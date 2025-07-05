@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Prediction Result | DeepVision</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-dark: #3a0ca3;
+            --secondary: #7209b7;
+            --accent: #f72585;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --success: #4cc9f0;
+            --warning: #ff9e00;
+            --danger: #ef233c;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+            color: var(--dark);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform: translateY(20px);
+            opacity: 0;
+            animation: fadeInUp 0.8s forwards 0.2s;
+        }
+        
+        @keyframes fadeInUp {
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                to bottom right,
+                rgba(255,255,255,0.3) 0%,
+                rgba(255,255,255,0) 60%
+            );
+            transform: rotate(30deg);
+            animation: shine 3s infinite;
+        }
+        
+        @keyframes shine {
+            0% { transform: rotate(30deg) translate(-30%, -30%); }
+            100% { transform: rotate(30deg) translate(30%, 30%); }
+        }
+        
+        .result-header {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin: 1.5rem 0;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .result-header::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            border-radius: 2px;
+            transform: scaleX(0);
+            transform-origin: left;
+            animation: expand 0.8s forwards 0.8s;
+        }
+        
+        @keyframes expand {
+            to { transform: scaleX(1); }
+        }
+        
+        .confidence-meter {
+            position: relative;
+            width: 80%;
+            max-width: 400px;
+            height: 20px;
+            background: rgba(0,0,0,0.1);
+            border-radius: 10px;
+            margin: 1.5rem auto;
+            overflow: hidden;
+        }
+        
+        .confidence-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            background: linear-gradient(90deg, var(--warning), var(--accent));
+            border-radius: 10px;
+            width: 0;
+            animation: fillWidth 1.5s forwards 0.5s;
+        }
+        
+        @keyframes fillWidth {
+            to { width: calc(var(--confidence-value) * 1%); }
+        }
+        
+        .confidence-value {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: white;
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
+        
+        .image-container {
+            position: relative;
+            margin: 2rem auto;
+            width: fit-content;
+            perspective: 1000px;
+        }
+        
+        .uploaded-image {
+            max-height: 400px;
+            border-radius: 15px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+            transform-style: preserve-3d;
+            transform: rotateY(20deg);
+            opacity: 0;
+            animation: imageAppear 1s forwards 0.4s;
+            transition: transform 0.5s, box-shadow 0.5s;
+            border: 3px solid white;
+        }
+        
+        @keyframes imageAppear {
+            to { 
+                transform: rotateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .uploaded-image:hover {
+            transform: scale(1.03) rotateY(-5deg);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+        
+        .info-section {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+            transform: translateY(20px);
+            opacity: 0;
+            animation: fadeInUp 0.8s forwards 0.6s;
+        }
+        
+        .section-title {
+            font-weight: 600;
+            color: var(--primary-dark);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .explanation-container {
+            margin: 2rem 0;
+            transform: translateY(20px);
+            opacity: 0;
+            animation: fadeInUp 0.8s forwards 0.8s;
+        }
+        
+        .explanation-image {
+            max-width: 100%;
+            border-radius: 15px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .explanation-image:hover {
+            transform: scale(1.02);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+        
+        .btn-neon {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 50px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(67, 97, 238, 0.4);
+            transform: translateY(20px);
+            opacity: 0;
+            animation: fadeInUp 0.8s forwards 1s;
+        }
+        
+        .btn-neon::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: 0.5s;
+            z-index: -1;
+        }
+        
+        .btn-neon:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(67, 97, 238, 0.6);
+        }
+        
+        .btn-neon:hover::before {
+            left: 100%;
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(67, 97, 238, 0.7); }
+            70% { box-shadow: 0 0 0 15px rgba(67, 97, 238, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(67, 97, 238, 0); }
+        }
+        
+        .floating {
+            animation: floating 3s ease-in-out infinite;
+        }
+        
+        @keyframes floating {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        @media (max-width: 768px) {
+            .result-header {
+                font-size: 1.8rem;
+            }
+            
+            .confidence-meter {
+                width: 90%;
+            }
+            
+            .uploaded-image {
+                max-height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container py-5">
+        <div class="glass-card mx-auto" style="max-width: 900px;">
+            <div class="card-header text-center">
+                <h2><i class="fas fa-robot me-2"></i> AI Prediction Result</h2>
+                <div class="pulse mt-2" style="width: 10px; height: 10px; background: var(--success); border-radius: 50%; display: inline-block;"></div>
+            </div>
+            
+            <div class="card-body text-center">
+                <h1 class="result-header">
+                    <span class="floating"><i class="fas fa-chart-pie me-2"></i></span>
+                    {{ result }}
+                </h1>
+                
+                <!-- Replace the confidence meter section with this: -->
+                <div class="confidence-meter">
+                    {% if confidence is number %}
+                    <div class="confidence-fill" style="--confidence-value: {{ (confidence * 100)|round(2) }};">
+                        <span class="confidence-value">{{ (confidence * 100)|round(2) }}%</span>
+                    </div>
+                    {% else %}
+                    <div class="confidence-fill" style="--confidence-value: 0;">
+                        <span class="confidence-value">N/A</span>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="image-container">
+                    <img src="{{ image_url }}" alt="Analyzed Image" class="img-fluid uploaded-image">
+                </div>
+
+                <div class="info-section">
+                    <h4 class="section-title">
+                        <i class="fas fa-info-circle text-primary"></i>
+                        Detailed Analysis
+                    </h4>
+                    <div class="text-start">
+                        {{ detailed_info|safe }}
+                    </div>
+                </div>
+
+                <div class="explanation-container">
+                    {% if lime_explanation and lime_explanation != "LIME explanation not available." %}
+                        <h4 class="section-title">
+                            <i class="fas fa-search text-primary"></i>
+                            Model Explanation
+                        </h4>
+                        <img src="{{ lime_explanation }}" alt="LIME Explanation" class="img-fluid explanation-image">
+                        <p class="text-muted mt-2">Highlighted areas show the most influential features for this prediction</p>
+                    {% else %}
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Model explanation is not available for this prediction
+                        </div>
+                    {% endif %}
+                </div>
+
+                <a href="/" class="btn btn-neon mt-4">
+                    <i class="fas fa-redo me-2"></i> Analyze Another Image
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Add interactive elements
+        document.addEventListener('DOMContentLoaded', function() {
+            // Animate confidence meter on scroll into view
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('animate');
+                    }
+                });
+            }, {threshold: 0.1});
+            
+            document.querySelectorAll('.confidence-meter').forEach(el => {
+                observer.observe(el);
+            });
+            
+            // Add ripple effect to button
+            const btn = document.querySelector('.btn-neon');
+            btn.addEventListener('click', function(e) {
+                let x = e.clientX - e.target.getBoundingClientRect().left;
+                let y = e.clientY - e.target.getBoundingClientRect().top;
+                
+                let ripple = document.createElement('span');
+                ripple.style.left = x + 'px';
+                ripple.style.top = y + 'px';
+                this.appendChild(ripple);
+                
+                setTimeout(() => {
+                    ripple.remove();
+                }, 1000);
+            });
+        });
+    </script>
+</body>
+</html>

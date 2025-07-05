@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prediction Result</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            color: #212529;
+        }
+        .card {
+            margin-top: 50px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .result-header {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        .confidence {
+            font-size: 1.2rem;
+            color: #28a745;
+        }
+        .detailed-info {
+            font-size: 1rem;
+            margin-top: 20px;
+            text-align: left;
+        }
+        .uploaded-image {
+            max-height: 400px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="card-body text-center">
+                <h1 class="result-header">{{ result }}</h1>
+                <!-- Uncomment the line below if you want to display confidence -->
+                <!-- <p class="confidence">Confidence: {{ confidence }}</p> -->
+                <img src="{{ image_url }}" alt="Uploaded Image" class="img-fluid uploaded-image rounded">
+                <div class="detailed-info">
+                    <h5>Detailed Information:</h5>
+                    {{ detailed_info|safe }} <!-- Render HTML content safely -->
+                </div>
+                <a href="/" class="btn btn-primary mt-4">Upload Another Image</a>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
